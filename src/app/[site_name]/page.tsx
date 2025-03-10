@@ -1,12 +1,13 @@
 "use client"; // Next.js App Router needs this for hooks
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import axios from "@/lib/axios";
 
-const DraftSite = ({ params }: { params: { site_name: string } }) => {
+const DraftSite = () => {
   const router = useRouter();
-  const { site_name } = params; // ✅ Await params correctly
+  const params = useParams();
+  const { site_name } = params; // Await params correctly
 
   useEffect(() => {
     const fetchLandingPage = async () => {
@@ -35,21 +36,21 @@ const DraftSite = ({ params }: { params: { site_name: string } }) => {
           // 4. Get the first page in that section
           const pagesResponse = await axios.get(`/guten/pages?site=${site_name}&section=${firstSection}`);
           if (pagesResponse.data.length > 0) {
-            router.replace(`/draft/${site_name}/${firstSection}/${pagesResponse.data[0].name}`);
+            router.replace(`/${site_name}/${firstSection}/${pagesResponse.data[0].name}`);
             return;
           }
         }
 
         // 5. If no pages exist, redirect to dashboard
-        router.replace(`/dashboard`);
+        router.replace(`/error`);
       } catch (error) {
         console.error("Error fetching site:", error);
-        router.replace(`/dashboard`); // Fallback to dashboard if error occurs
+        router.replace(`/error`); // Fallback to dashboard if error occurs
       }
     };
 
     fetchLandingPage();
-  }, [site_name, router]); // ✅ Correct dependency array
+  }, [site_name, router]); // Correct dependency array
 
   return null; // This page **only redirects**, nothing to render
 };

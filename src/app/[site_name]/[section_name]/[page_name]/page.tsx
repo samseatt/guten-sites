@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from "next/navigation";
 import axios from '@/lib/axios';
 import ReactMarkdown from "react-markdown";
+import remarkGfm from 'remark-gfm'; // Import GitHub Flavored Markdown
 import {
   Breadcrumbs,
   Link as MuiLink,
@@ -26,6 +27,8 @@ interface SiteData {
     id: number;
     name: string;
     title: string;
+    logo: string;
+    url: string;
   //   theme: string;
     pages: { id: number; name: string; title: string; path: string }[];
   }
@@ -38,7 +41,7 @@ interface PageData {
 //   abstract: { text: string; author?: string; source?: string }[];
   abstract: string[];
   content: string[];
-  primaryImage: string;
+  primary_image: string;
 }
 
 interface SectionData {
@@ -75,11 +78,6 @@ export default function ContentPage({ params }: { params: { site_name: string, s
 
         console.log('Page being rendered with: ', site_name, section_name, page_name);
         
-        // Fetch page by name
-        // const pageResponse = await axios.get(`/guten/pages/${page_name}?site=${site_name}&section=${section_name}`);
-        // setPage(response.data);
-        // setUpdatedPage(response.data);
-
         // Fetch site details
         const siteResponse = await axios.get(`/guten/sites/${site_name}`);
         if (siteResponse.data != null) {
@@ -118,38 +116,7 @@ export default function ContentPage({ params }: { params: { site_name: string, s
           setPages(pagesResponse.data);
         } else {
           setError(`Pages were not found for section: ${section_name}`);
-        }
-    
-        // // Fetch all pages in the category
-        // const categoryResponse = await axios.get(`/guten/pages/${page_name}?site=${site_name}&section=${section_name}`);
-        // setPage(pageResponse.data);
-
-        // // Fetch all pages in the category
-        // const categoryResponse = await axios.get(`/guten/pages/${page_name}?site=${site_name}&section=${section_name}`);
-        // setPage(pageResponse.data);
-
-
-        // const contentResponse = await axios.get(`http://localhost:5000/contents?name=${name}`);
-        // if (pageResponse.data.length > 0) {
-        //   setPage(pageResponse.data[0]);
-        // } else {
-        //   setError(`Content not found for page: ${page_name}`);
-        // }
-
-        // // Fetch category details for the current content
-        // if (contentResponse.data.length > 0) {
-        //   const categoryName = contentResponse.data[0].category;
-        //   const categoryResponse = await axios.get(`http://localhost:5000/categories?name=${categoryName}`);
-        //   if (categoryResponse.data.length > 0) {
-        //     setCategory(categoryResponse.data[0]);
-        //   } else {
-        //     setError(`Category not found for name: ${categoryName}`);
-        //   }
-        // }
-
-    //     // Fetch all top-level categories for the top menu
-    //     const categoriesResponse = await axios.get('http://localhost:5000/categories');
-    //     setCategories(categoriesResponse.data);
+        }    
       } catch (err) {
         setError('Failed to load data. Please try again later.');
       } finally {
@@ -183,17 +150,21 @@ export default function ContentPage({ params }: { params: { site_name: string, s
       {/* <Typography color="textPrimary">{page.content}</Typography> */}
       {/* Left Sidebar */}
       <Box sx={{ width: '25%', minWidth: 250 }}>
-        {/* Logo TODO: get log from the site table */}
+        {/* Logo */}
         <Box sx={{ textAlign: 'center', mb: 2 }}>
-          <img src="/assets/logo.png" alt="Logo" style={{ maxWidth: '80%' }} />
+          <img src={site.logo} alt="Logo" style={{ maxWidth: '50%' }} />
+        </Box>
+
+        <Box sx={{ bgcolor: 'white', color: site?.color || 'primary.main', padding: 1, mt: 0 }}>
+            <Typography variant="h4" gutterBottom>{site.title}</Typography>
         </Box>
 
         {/* Breadcrumbs (Compressed into Sidebar) */}
-        <Breadcrumbs sx={{ mb: 2, fontSize: '0.9rem' }}>
+        <Box sx={{ mb: 2, fontSize: '0.9rem' }}>
           {/* <MuiLink href="/" color="inherit">{site.title}</MuiLink> */}
-          <MuiLink href={`/content/${section.name}`} color="inherit">{section.title}</MuiLink>
+          <MuiLink href={`/${site.name}/${section.name}`} color="inherit">{section.title}</MuiLink>
           <Typography color="textPrimary">{page.title}</Typography>
-        </Breadcrumbs>
+        </Box>
 
         <Divider sx={{ mb: 2 }} />
 
@@ -203,7 +174,7 @@ export default function ContentPage({ params }: { params: { site_name: string, s
             <ListItem
               key={pg.id}
               component="a"
-              href={`/draft/${site.name}/${section.name}/${pg.name}`}
+              href={`/${site.name}/${section.name}/${pg.name}`}
               sx={{
                 textDecoration: 'none',
                 color: 'inherit',
@@ -220,12 +191,12 @@ export default function ContentPage({ params }: { params: { site_name: string, s
       {/* Main Content Area */}
       <Box sx={{ flex: 1 }}>
         {/* Header with Sectional Menu (Now within content box) */}
-        <AppBar position="static" sx={{ width: '100%', bgcolor: 'primary.main' }}>
+        <AppBar position="static" sx={{ width: '100%', bgcolor: site?.color || 'primary.main' }}>
           <Toolbar>
             {sections.map((sec) => (
               <MuiLink
                 key={sec.id}
-                href={`/content/${sec.name}`}
+                href={`/${site.name}/${sec.name}`}
                 color="inherit"
                 underline="none"
                 sx={{
@@ -234,7 +205,7 @@ export default function ContentPage({ params }: { params: { site_name: string, s
                   marginRight: 2,
                 }}
               >
-                {sec.title}
+                {sec.label}
               </MuiLink>
             ))}
           </Toolbar>
@@ -244,25 +215,38 @@ export default function ContentPage({ params }: { params: { site_name: string, s
         <CardMedia
           component="img"
           sx={{ width: '100%', height: 192, mt: 0 }} // 3:1 aspect ratio (1728x576 example)
-          image={page.primaryImage || '/assets/default.png'}
+          image={page.primary_image || '/assets/default.png'}
           alt={page.title}
         />
 
         {/* Abstract/Quote Section */}
-        <Box sx={{ bgcolor: 'white', color: 'primary.main', padding: 3, mt: 0 }}>
+        <Box sx={{ bgcolor: 'white', color: site?.color || 'primary.main', padding: 3, mt: 0 }}>
             <Typography variant="h6" gutterBottom>{page.abstract}</Typography>
         </Box>
 
-        <Box sx={{ mt: 2 }}>
+        {/* <Box sx={{ mt: 2 }}>
             <ReactMarkdown>{page.content}</ReactMarkdown>
+        </Box> */}
+
+        {/* <Box sx={{ mt: 2 }}>
+          <Typography variant="body1" sx={{ fontSize: '1.2rem' }}>
+            <ReactMarkdown>{page.content}</ReactMarkdown>
+          </Typography>
+        </Box> */}
+
+        <Box sx={{ mt: 2, fontSize: '1.2rem', lineHeight: '1.6' }}>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{page.content}</ReactMarkdown>
         </Box>
 
         {/* Footer (Now inside the content box) */}
-        <Box sx={{ marginTop: 4, padding: 2, bgcolor: 'primary.dark', color: 'white', textAlign: 'center' }}>
+        <Box sx={{ marginTop: 4, padding: 2, bgcolor: site?.color || 'primary.main', color: 'white', textAlign: 'center' }}>
           <Typography variant="body2">
-            © {new Date().getFullYear()} Adaptive Enterprise Inc. |{' '}
+            © {new Date().getFullYear()} {site.title} | {site.url} | {' '}
+            {/* <MuiLink href="{site.url}" color="inherit" underline="always">{site.url}</MuiLink> |{' '} */}
+            <MuiLink href="{site.url}" color="inherit" underline="always">info</MuiLink>
+            {/* © {new Date().getFullYear()} {site.title} |{' '}
             <MuiLink href="/privacy" color="inherit" underline="always">Privacy Policy</MuiLink> |{' '}
-            <MuiLink href="/terms" color="inherit" underline="always">Terms of Use</MuiLink>
+            <MuiLink href="/terms" color="inherit" underline="always">Terms of Use</MuiLink> */}
           </Typography>
         </Box>
       </Box>
