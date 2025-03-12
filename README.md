@@ -1,36 +1,130 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Guten Sites
 
-## Getting Started
+Guten Sites is the project responsible for serving published websites created using Guten Ink. It ensures that each website has its unique domain or subdomain and serves the site content in a scalable, efficient, and customizable manner. This project is distinct from **Guten Portal**, which is responsible for site creation and management.
 
-First, run the development server:
+## 🚀 Features
+- **Serve Published Websites**: Hosts static and dynamic content for published sites.
+- **Nginx Integration**: Uses Nginx for routing custom domains and subdomains.
+- **Custom Theming**: Each website is served with its defined theme and styles.
+- **S3 Image Hosting**: Supports serving images and other assets from AWS S3.
+- **SEO & Performance Optimized**: Ensures fast and accessible page loads.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 📂 Project Structure
+```
+guten-sites/
+│── src/
+│   ├── app/
+│   │   ├── [site_name]/
+│   │   │   ├── layout.tsx  # Layout for each served site
+│   │   │   ├── page.tsx    # Landing page for a site
+│   │   │   ├── [section_name]/
+│   │   │   │   ├── page.tsx  # Section-level navigation
+│   │   │   │   ├── [page_name]/
+│   │   │   │   │   ├── page.tsx  # Individual pages
+│   │   ├── assets/  # Static assets (e.g., logos, default favicon)
+│   ├── components/  # Reusable UI components
+│   ├── lib/         # API & utilities
+│   ├── styles/      # Global styles
+│── public/          # Public assets (e.g., site-specific favicons)
+│── nginx/           # Nginx configurations
+│── docker/          # Docker deployment setup
+│── package.json
+│── tsconfig.json
+│── README.md
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Prerequisites
+- **Node.js** (v18+ recommended)
+- **pnpm** or **npm**
+- **Docker & Docker Compose** (for containerized deployment)
+- **AWS S3 Bucket** (for storing site assets like images)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Local Development
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/your-repo/guten-sites.git
+   cd guten-sites
+   ```
+2. Install dependencies:
+   ```sh
+   pnpm install  # or npm install
+   ```
+3. Start the development server:
+   ```sh
+   pnpm dev  # or npm run dev
+   ```
+4. Visit `http://localhost:3001/site_name/section_name/page_name` to view a sample site.
 
-## Learn More
+### Deployment
+#### 1️⃣ **Run with Docker**
+```sh
+docker-compose up -d
+```
+#### 2️⃣ **Configure Nginx** (For Custom Domains)
+Modify `nginx.conf` to map domains to the correct site routes:
+```nginx
+server {
+    listen 80;
+    server_name mywebsite.com;
 
-To learn more about Next.js, take a look at the following resources:
+    location / {
+        proxy_pass http://localhost:3001/site_name/;
+    }
+}
+```
+Reload Nginx:
+```sh
+sudo systemctl reload nginx
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔗 API Integration
+Guten Sites interacts with **Guten Crust** to fetch published content. API examples:
+```sh
+# Fetch site details
+GET /guten/published/sites/{site_name}
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Fetch section details
+GET /guten/published/sections/{section_name}?site={site_name}
 
-## Deploy on Vercel
+# Fetch published page
+GET /guten/published/pages/{page_name}?site={site_name}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🎨 Theming & Customization
+Each site can define its:
+- **Color theme**: Background, typography, and component styles.
+- **Favicon**: Site-specific icon stored in `public/{site_name}/favicon.ico`.
+- **Typography & Layout**: Configurable via `src/styles/themes.ts`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📦 Static Asset Hosting
+- **Images & Files**: Stored in **AWS S3** under `s3://guten-sites/{site_name}/assets/`.
+- **Favicon & Logos**: Retrieved from site settings in the database.
+
+## 🔐 Security Considerations
+- **HTTPS with Let's Encrypt**: SSL certificates for custom domains.
+- **Content Delivery via CloudFront**: Optional CDN support.
+- **Rate Limiting & Caching**: To prevent abuse and optimize speed.
+
+## 🏗️ Future Enhancements
+- **Multisite Scaling**: Kubernetes support for handling thousands of sites.
+- **User-uploaded media**: Direct image uploads via admin panel.
+- **Enhanced SEO tools**: Automatic sitemap & metadata generation.
+- **Built-in analytics**: Track visitor engagement per site.
+
+## 🤝 Contributing
+Want to improve Guten Sites? Feel free to open issues & PRs!
+
+```sh
+git checkout -b feature/new-improvement
+git commit -m "Added new feature"
+git push origin feature/new-improvement
+```
+
+## 📄 License
+MIT License © 2024 Guten Ink
+
+---
+**Guten Sites**: Powering the web, one site at a time.
+
