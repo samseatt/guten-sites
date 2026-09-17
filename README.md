@@ -15,7 +15,7 @@ make check SERVICE=sites
 
 Sites uses port **3000**. The existing Node dependencies must be installed first. Use the check and build commands to validate changes before deployment.
 
-The current clients use NEXT_PUBLIC_GUTEN_CRUST_URL (http://localhost:8000/api/guten) and NEXT_PUBLIC_API_BASE_URL (http://localhost:8000/api). Local .env files stay outside Git.
+Both HTTP clients share `NEXT_PUBLIC_API_BASE_URL` (default `http://localhost:8000/api`). The older `NEXT_PUBLIC_GUTEN_CRUST_URL` remains a fallback for compatibility; prefer the canonical setting in `.env.example`. Public settings are embedded during Next.js builds and must never contain secrets. Local `.env` files stay outside Git. `/health` is a process liveness endpoint. The unused token interceptor has been removed; authentication remains a separate deployment task.
 
 ## Content and media
 
@@ -33,3 +33,5 @@ public/assets/ — ignored content media
 ```
 
 See [per-site publishing](../guten-datalake/docs/publishing.md) for the editor workflow, API, migration, and initial publication seeding. Portal/View Draft reads draft; Guten Sites reads published content only.
+
+Cross-service browser acceptance tests live in the coordination repository: [testing guide](../guten/docs/testing.md).
