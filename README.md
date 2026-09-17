@@ -1,6 +1,6 @@
 # Guten Sites
 
-Separate Next.js/React/MUI site renderer, with routes /<site_name>/<section_name>/<page_name>. The renderer reads published content through Guten Crust. Portal edits become visible here only after Publish. Authentication/authorization, custom-domain routing, and S3 delivery remain deployment work.
+Separate Next.js/React/MUI site renderer, with routes /<site_name>/<section_name>/<page_name>. The renderer reads published content through Guten Crust. Portal edits become visible here only after Publish. Sites remains publicly readable. Portal has separate gateway authentication; custom-domain routing and S3 delivery remain deployment work.
 
 ## Local development
 
@@ -15,7 +15,7 @@ make check SERVICE=sites
 
 Sites uses port **3000**. The existing Node dependencies must be installed first. Use the check and build commands to validate changes before deployment.
 
-Both HTTP clients share `NEXT_PUBLIC_API_BASE_URL` (default `http://localhost:8000/api`). The older `NEXT_PUBLIC_GUTEN_CRUST_URL` remains a fallback for compatibility; prefer the canonical setting in `.env.example`. Public settings are embedded during Next.js builds and must never contain secrets. Local `.env` files stay outside Git. `/health` is a process liveness endpoint. The unused token interceptor has been removed; authentication remains a separate deployment task.
+Both HTTP clients share `NEXT_PUBLIC_API_BASE_URL` (default `http://localhost:8000/api`). The older `NEXT_PUBLIC_GUTEN_CRUST_URL` remains a fallback for compatibility; prefer the canonical setting in `.env.example`. Public settings are embedded during Next.js builds and must never contain secrets. Local `.env` files stay outside Git. `/health` is a process liveness endpoint. The public Docker gateway permits published reads only; editorial APIs require Portal authentication.
 
 ## Content and media
 
