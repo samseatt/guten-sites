@@ -1,6 +1,6 @@
 # Guten Sites
 
-Separate Next.js/React/MUI site renderer, with routes /<site_name>/<section_name>/<page_name>. The current local MVP intentionally reads draft content through Guten Crust so portal edits appear immediately. A working publication boundary, authentication/authorization, custom-domain routing, and S3 delivery are not implemented.
+Separate Next.js/React/MUI site renderer, with routes /<site_name>/<section_name>/<page_name>. The renderer reads published content through Guten Crust. Portal edits become visible here only after Publish. Authentication/authorization, custom-domain routing, and S3 delivery remain deployment work.
 
 ## Local development
 
@@ -31,3 +31,5 @@ src/components/ — landing redirect
 src/lib/ — clients and theme
 public/assets/ — ignored content media
 ```
+
+See [per-site publishing](../guten-datalake/docs/publishing.md) for the editor workflow, API, migration, and initial publication seeding. Portal/View Draft reads draft; Guten Sites reads published content only.

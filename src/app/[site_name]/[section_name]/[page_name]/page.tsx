@@ -67,63 +67,20 @@ export default function ContentPage() {
 //   const { name } = params;
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Await resolution of `params`
-
-
-        console.log('Page being rendered with: ', site_name, section_name, page_name);
-        
-        // Fetch site details
-        const siteResponse = await axios.get(`/guten/sites/${site_name}`);
-        if (siteResponse.data != null) {
-            setSite(siteResponse.data);
-        } else {
-            setError(`Site details not found for site: ${site_name}`);
-        }
-
-        // Fetch section details
-        const sectionResponse = await axios.get(`/guten/sections/${section_name}?site=${site_name}`);
-        if (sectionResponse.data != null) {
-            setSection(sectionResponse.data);
-        } else {
-            setError(`Section details not found for section: ${section_name}`);
-        }
-        
-        // Fetch page details
-        const pageResponse = await axios.get(`/guten/pages/${page_name}?site=${site_name}&section=${section_name}`);
-        if (pageResponse.data != null) {
-          setPage(pageResponse.data);
-        } else {
-          setError(`Content not found for page: ${page_name}`);
-        }
-
-        // Fetch site sections
-        const sectionsResponse = await axios.get(`/guten/sections?site=${site_name}`);
-        if (sectionsResponse.data != null) {
-          setSections(sectionsResponse.data);
-        } else {
-          setError(`Sections were not found for site: ${site_name}`);
-        }
-    
-        // Fetch section pages
-        const pagesResponse = await axios.get(`/guten/pages?site=${site_name}&section=${section_name}`);
-        if (pagesResponse.data != null) {
-          setPages(pagesResponse.data);
-        } else {
-          setError(`Pages were not found for section: ${section_name}`);
-        }    
-      } catch {
-        setError('Failed to load data. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    const controller = new AbortController();
+    setLoading(true); setError(null);
+    // One response keeps site metadata, menus and content on the same publication.
+    axios.get(`/guten/published/sites/${encodeURIComponent(site_name)}/page`, {
+      params: { section: section_name, page: page_name }, signal: controller.signal, timeout: 15000,
+    }).then(({ data }) => {
+      if (controller.signal.aborted) return;
+      setSite(data.site); setSection(data.section); setPage(data.page);
+      setSections(data.sections); setPages(data.pages);
+    }).catch(error => {
+      if (!controller.signal.aborted) setError(error.response?.status === 404
+        ? "No published page is available at this address." : "Failed to load this page. Please try again later.");
+    }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
   }, [site_name, section_name, page_name]);
 
   if (loading) {
