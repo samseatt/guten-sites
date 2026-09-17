@@ -19,7 +19,7 @@ Both HTTP clients share `NEXT_PUBLIC_API_BASE_URL` (default `http://localhost:80
 
 ## Content and media
 
-Page text and image references live in PostgreSQL. Actual local images live under public/assets, which is ignored by Git and must be backed up separately. Preserve the existing /assets/... paths. Small tracked SVGs outside that folder are application scaffolding still referenced by the root page.
+Page text and image references live in PostgreSQL. Actual local images live under public/assets, which is ignored by Git and must be backed up separately. Preserve the existing /assets/... paths. The root page asks readers to open their publication’s website address.
 
 See [local operations](../guten/README.md), [storage and proposed S3 delivery](../guten/docs/storage-and-git.md), and [database recovery](../guten-datalake/docs/psql/how-to-backup-psql.md).
 
@@ -39,3 +39,5 @@ Cross-service browser acceptance tests live in the coordination repository: [tes
 ## Containers
 
 The Dockerfile and .dockerignore package this service without local secrets, dumps, installed dependencies or content media. Build/start it using the sibling coordination repository’s [Docker Compose guide](../guten/docs/docker.md). The container rehearsal uses a separate empty database and alternate localhost ports.
+
+See [root pages and planned domain routing](../guten/docs/domain-routing.md) for the Portal home and public site entry points.
