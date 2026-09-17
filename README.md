@@ -13,7 +13,7 @@ make run SERVICE=sites
 make check SERVICE=sites
 ```
 
-Sites uses port **3000**. The existing Node dependencies must be installed first. TypeScript errors and a missing declared PostCSS dependency remain build blockers to address separately; this cleanup does not claim a passing production build.
+Sites uses port **3000**. The existing Node dependencies must be installed first. Use the check and build commands to validate changes before deployment.
 
 The current clients use NEXT_PUBLIC_GUTEN_CRUST_URL (http://localhost:8000/api/guten) and NEXT_PUBLIC_API_BASE_URL (http://localhost:8000/api). Local .env files stay outside Git.
 
@@ -22,3 +22,12 @@ The current clients use NEXT_PUBLIC_GUTEN_CRUST_URL (http://localhost:8000/api/g
 Page text and image references live in PostgreSQL. Actual local images live under public/assets, which is ignored by Git and must be backed up separately. Preserve the existing /assets/... paths. Small tracked SVGs outside that folder are application scaffolding still referenced by the root page.
 
 See [local operations](../guten/README.md), [storage and proposed S3 delivery](../guten/docs/storage-and-git.md), and [database recovery](../guten-datalake/docs/psql/how-to-backup-psql.md).
+
+## Project structure
+
+```text
+src/app/[site_name]/ — site/section landing routes and page renderer
+src/components/ — landing redirect
+src/lib/ — clients and theme
+public/assets/ — ignored content media
+```

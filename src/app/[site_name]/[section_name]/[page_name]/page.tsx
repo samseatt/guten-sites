@@ -1,16 +1,14 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import axios from '@/lib/axios';
 import ReactMarkdown from "react-markdown";
 import remarkGfm from 'remark-gfm'; // Import GitHub Flavored Markdown
 import {
-  Breadcrumbs,
   Link as MuiLink,
   Typography,
-//   Card,
-  // CardContent,
+//   // CardContent,
   CardMedia,
   CircularProgress,
   Box,
@@ -28,6 +26,7 @@ interface SiteData {
     name: string;
     title: string;
     logo: string;
+    color: string | null;
     url: string;
   //   theme: string;
     pages: { id: number; name: string; title: string; path: string }[];
@@ -39,12 +38,13 @@ interface PageData {
   name: string;
   title: string;
 //   abstract: { text: string; author?: string; source?: string }[];
-  abstract: string[];
-  content: string[];
+  abstract: string | null;
+  content: string;
   primary_image: string;
 }
 
 interface SectionData {
+  label: string | null;
   id: number;
   site_id: number;
   name: string;
@@ -53,7 +53,8 @@ interface SectionData {
   pages: { id: number; name: string; title: string; path: string }[];
 }
 
-export default function ContentPage({ params }: { params: { site_name: string, section_name: string, page_name: string } }) {
+export default function ContentPage() {
+  const { site_name, section_name, page_name } = useParams<{ site_name: string; section_name: string; page_name: string }>();
 //   const { site_name, section_name, page_name } = useParams();
   const [site, setSite] = useState<SiteData | null>(null);
   const [section, setSection] = useState<SectionData | null>(null);
@@ -69,12 +70,10 @@ export default function ContentPage({ params }: { params: { site_name: string, s
     const fetchData = async () => {
       try {
         setLoading(true);
+        setError(null);
 
         // Await resolution of `params`
-        const resolvedParams = await params;
-        const { site_name } = resolvedParams;
-        const { section_name } = resolvedParams;
-        const { page_name } = resolvedParams;
+
 
         console.log('Page being rendered with: ', site_name, section_name, page_name);
         
@@ -117,7 +116,7 @@ export default function ContentPage({ params }: { params: { site_name: string, s
         } else {
           setError(`Pages were not found for section: ${section_name}`);
         }    
-      } catch (err) {
+      } catch {
         setError('Failed to load data. Please try again later.');
       } finally {
         setLoading(false);
@@ -125,7 +124,7 @@ export default function ContentPage({ params }: { params: { site_name: string, s
     };
 
     fetchData();
-  }, [params]);
+  }, [site_name, section_name, page_name]);
 
   if (loading) {
     return (
@@ -136,7 +135,7 @@ export default function ContentPage({ params }: { params: { site_name: string, s
   }
 
 //   if (error || !content || !category || !categories) {
-  if (error || !page) {
+  if (error || !page || !site || !section || !sections || !pages) {
         return (
       <Container>
         <Typography variant="h6" color="error">
@@ -242,8 +241,8 @@ export default function ContentPage({ params }: { params: { site_name: string, s
         <Box sx={{ marginTop: 4, padding: 2, bgcolor: site?.color || 'primary.main', color: 'white', textAlign: 'center' }}>
           <Typography variant="body2">
             © {new Date().getFullYear()} {site.title} | {site.url} | {' '}
-            {/* <MuiLink href="{site.url}" color="inherit" underline="always">{site.url}</MuiLink> |{' '} */}
-            <MuiLink href="{site.url}" color="inherit" underline="always">info</MuiLink>
+            {/* <MuiLink href={site.url} color="inherit" underline="always">{site.url}</MuiLink> |{' '} */}
+            <MuiLink href={site.url} color="inherit" underline="always">info</MuiLink>
             {/* © {new Date().getFullYear()} {site.title} |{' '}
             <MuiLink href="/privacy" color="inherit" underline="always">Privacy Policy</MuiLink> |{' '}
             <MuiLink href="/terms" color="inherit" underline="always">Terms of Use</MuiLink> */}
