@@ -1,20 +1,16 @@
-// src/app/layout.tsx
-'use client';
+import React from "react";
+import { headers } from "next/headers";
+import type { Metadata } from "next";
+import SiteProviders from "@/components/SiteProviders";
 
-import React from 'react';
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import theme from '../lib/theme';
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <body>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          {children}
-        </ThemeProvider>
-      </body>
-    </html>
-  );
+export async function generateMetadata(): Promise<Metadata> {
+  const h = await headers();
+  const origin = h.get("x-guten-origin");
+  return origin ? { alternates: { canonical: origin + (h.get("x-guten-path") || "/") } } : {};
+}
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const h = await headers();
+  return <html lang="en"><body>
+    <SiteProviders site={h.get("x-guten-site") || ""}>{children}</SiteProviders>
+  </body></html>;
 }

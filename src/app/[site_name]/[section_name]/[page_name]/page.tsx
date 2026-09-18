@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from "next/navigation";
+import { useSitePath, useContentHref } from "@/components/SiteProviders";
 import axios from '@/lib/axios';
 import ReactMarkdown from "react-markdown";
 import remarkGfm from 'remark-gfm'; // Import GitHub Flavored Markdown
@@ -54,6 +55,8 @@ interface SectionData {
 }
 
 export default function ContentPage() {
+  const sitePath = useSitePath();
+  const contentHref = useContentHref();
   const { site_name, section_name, page_name } = useParams<{ site_name: string; section_name: string; page_name: string }>();
 //   const { site_name, section_name, page_name } = useParams();
   const [site, setSite] = useState<SiteData | null>(null);
@@ -118,7 +121,7 @@ export default function ContentPage() {
         {/* Breadcrumbs (Compressed into Sidebar) */}
         <Box sx={{ mb: 2, fontSize: '0.9rem' }}>
           {/* <MuiLink href="/" color="inherit">{site.title}</MuiLink> */}
-          <MuiLink href={`/${site.name}/${section.name}`} color="inherit">{section.title}</MuiLink>
+          <MuiLink href={sitePath(site.name, section.name)} color="inherit">{section.title}</MuiLink>
           <Typography color="textPrimary">{page.title}</Typography>
         </Box>
 
@@ -130,7 +133,7 @@ export default function ContentPage() {
             <ListItem
               key={pg.id}
               component="a"
-              href={`/${site.name}/${section.name}/${pg.name}`}
+              href={sitePath(site.name, section.name, pg.name)}
               sx={{
                 textDecoration: 'none',
                 color: 'inherit',
@@ -152,7 +155,7 @@ export default function ContentPage() {
             {sections.map((sec) => (
               <MuiLink
                 key={sec.id}
-                href={`/${site.name}/${sec.name}`}
+                href={sitePath(site.name, sec.name)}
                 color="inherit"
                 underline="none"
                 sx={{
@@ -191,7 +194,7 @@ export default function ContentPage() {
         </Box> */}
 
         <Box sx={{ mt: 2, fontSize: '1.2rem', lineHeight: '1.6' }}>
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{page.content}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ a: ({ href, children }) => <a href={contentHref(href)}>{children}</a> }}>{page.content}</ReactMarkdown>
         </Box>
 
         {/* Footer (Now inside the content box) */}
